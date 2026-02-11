@@ -3,6 +3,7 @@ import { neon } from '@neondatabase/serverless';
 export default async function handler(req, res) {
   const sql = neon(process.env.DATABASE_URL);
   
+  // Seguridad: Verificar Token
   const authToken = req.headers['x-api-key'];
   const secretToken = process.env.API_SECRET_TOKEN;
 
@@ -10,7 +11,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ success: false, message: "No autorizado" });
   }
 
-  // CASO 1: Obtener datos (GET)
+  // GET: Obtener datos
   if (req.method === 'GET') {
     try {
       const data = await sql`SELECT * FROM attendance ORDER BY created_at DESC LIMIT 100`;
@@ -20,7 +21,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // CASO 2: Enviar asistencia (POST)
+  // POST: Guardar registro
   if (req.method === 'POST') {
     try {
       const { date, hour, type, name, tne } = req.body;
@@ -34,7 +35,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // CASO 3: Eliminar todos los registros (DELETE)
+  // DELETE: Borrar todo
   if (req.method === 'DELETE') {
     try {
       await sql`TRUNCATE TABLE attendance`;
